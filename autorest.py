@@ -1,9 +1,9 @@
-# 
-# It provides a way to get fully functional REST api 
+#
+# It provides a way to get fully functional REST api
 # for my models adding only one line to urls.py
 # see test1/urls.py
-# 
-# generates 
+#
+# generates
 #  /test1/autorest/musician/
 #  /test1/autorest/musician/<pk>
 #  /test1/autorest/album/
@@ -21,26 +21,27 @@ def snake_case(name):
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
-def  rest_generator( models_module):
+def rest_generator(models_module):
 
     router = routers.SimpleRouter()
 
     for class_name in dir(models_module):
         model = getattr(models_module, class_name)
-        if type(model) != type(django.db.models.Model): continue
-        
+        if type(model) != type(django.db.models.Model):
+            continue
+
         # Generate Serializers
         serializer_name = class_name+'Serializer'
         serializer = type(
-            serializer_name, 
+            serializer_name,
             (serializers.ModelSerializer,),
             {
                 'Meta': type(
-                    'Meta', 
-                    (object,), 
+                    'Meta',
+                    (object,),
                     {
-                        'fields' : '__all__',
-                        'model'  : model
+                        'fields': '__all__',
+                        'model': model
                     }
                 ),
             }
@@ -49,15 +50,14 @@ def  rest_generator( models_module):
         # Make ViewSet
         view_name = class_name+'ViewSetAuto'
         view = type(
-            view_name, 
+            view_name,
             (viewsets.ModelViewSet,),
             {
                 'queryset': model.objects.all(),
-                'serializer_class' : serializer
+                'serializer_class': serializer
             }
         )
-        
-        router.register( r'autorest/'+snake_case(class_name), view)
-        
-    return router.urls
 
+        router.register(r'autorest/'+snake_case(class_name), view)
+
+    return router.urls
